@@ -18,14 +18,11 @@ describe("simple-token-anchor", () => {
   let ata1Pda: anchor.web3.PublicKey;
   let ata2Pda: anchor.web3.PublicKey;
 
-  // Fund all accounts before running tests
   before(async () => {
-    // Request airdrops for all users
     await provider.connection.requestAirdrop(user1.publicKey, 2 * anchor.web3.LAMPORTS_PER_SOL);
     await provider.connection.requestAirdrop(user2.publicKey, 2 * anchor.web3.LAMPORTS_PER_SOL);
     await provider.connection.requestAirdrop(delegate.publicKey, 2 * anchor.web3.LAMPORTS_PER_SOL);
     
-    // Wait for confirmations
     await new Promise(resolve => setTimeout(resolve, 3000));
   });
 
@@ -84,7 +81,6 @@ describe("simple-token-anchor", () => {
       .signers([user2])
       .rpc();
 
-    // Derive the PDA after creation to get the address for future tests
     [ata2Pda] = await anchor.web3.PublicKey.findProgramAddress(
       [Buffer.from("ata"), user2.publicKey.toBuffer(), mintKeypair.publicKey.toBuffer()],
       program.programId
@@ -136,7 +132,7 @@ describe("simple-token-anchor", () => {
 
   it("Set delegate for user1 ATA", async () => {
     const tx = await program.methods
-      .delegation(new BN(100)) // allow delegate to spend 100
+      .delegation(new BN(100))
       .accountsPartial({
         delegate: delegate.publicKey,
         ataAccount: ata1Pda,
@@ -168,7 +164,7 @@ describe("simple-token-anchor", () => {
     const ata1 = await program.account.ata.fetch(ata1Pda);
     const ata2 = await program.account.ata.fetch(ata2Pda);
     expect(Number(ata1.amount)).to.equal(250);
-    expect(Number(ata1.delegateAmount)).to.equal(50); // reduced by transfer
+    expect(Number(ata1.delegateAmount)).to.equal(50);
     expect(Number(ata2.amount)).to.equal(250);
   });
 
