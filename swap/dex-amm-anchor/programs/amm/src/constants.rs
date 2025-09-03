@@ -1,0 +1,1 @@
+pub const PROTOCOL_FEE: u64 = 5; // 0.05%
