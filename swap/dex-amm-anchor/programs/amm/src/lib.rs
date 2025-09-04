@@ -13,7 +13,7 @@ pub mod error;
 pub mod amm {
     use super::*;
 
-    pub fn initialize(ctx: Context<Init>, seeds:u64, fee: u64, owner: Option<Pubkey>) -> Result<()> {
+    pub fn initialize(ctx: Context<Init>, seeds:u64, fee: u16, owner: Option<Pubkey>) -> Result<()> {
         ctx.accounts.handle_initialize(seeds, &ctx.bumps , fee, owner)?;
         Ok(())
     }
@@ -27,9 +27,9 @@ pub mod amm {
         ctx.accounts.handle_withdraw(amount, min_token_x, min_token_y)?;
         Ok(())
     }
-    
-    pub fn swap(ctx: Context<Swap>) -> Result<()> {
-        msg!("Swap Instruction done");
+
+    pub fn swap(ctx: Context<Swap>, lp_pair_x: bool, amount: u64, min_swap_amount: u64) -> Result<()> {
+        ctx.accounts.handle_swap(lp_pair_x, amount, min_swap_amount)?;
         Ok(())
     }
 
