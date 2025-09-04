@@ -54,7 +54,7 @@ impl<'info> Init<'info> {
         &mut self,
         seeds: u64,
         bump: &InitBumps,
-        fee: u64,
+        fee: u16,
         owner: Option<Pubkey>,
     ) -> Result<()> {
         let pool_config = &mut self.pool_config.set_inner(
