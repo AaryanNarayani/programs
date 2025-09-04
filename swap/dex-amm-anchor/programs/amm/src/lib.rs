@@ -6,6 +6,7 @@ declare_id!("85krVjvbktge3QdRPU5dRYSaaSXi2CgB7cqhreoABi36");
 pub use instructions::*;
 pub mod state;
 pub mod constants;
+pub mod error;
 
 
 #[program]

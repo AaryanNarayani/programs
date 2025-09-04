@@ -12,4 +12,5 @@ pub struct PoolConfig {
     pub token_x_mint: Pubkey,
     pub token_y_mint: Pubkey,
     pub owner: Option<Pubkey>,
+    pub is_locked: bool,
 }

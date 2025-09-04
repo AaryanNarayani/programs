@@ -1,7 +1,8 @@
 use anchor_lang::prelude::*;
-use anchor_spl::{associated_token::AssociatedToken, token::{Mint, Token, TokenAccount}};
+use anchor_spl::{associated_token::AssociatedToken, token::{transfer , mint_to , MintTo ,Mint, Token, TokenAccount, Transfer}};
+use constant_product_curve::ConstantProduct;
 
-use crate::state::PoolConfig;
+use crate::{error::{AmmDexError, PoolConfigError}, state::PoolConfig};
 #[derive(Accounts)]
 pub struct Deposit<'info> {
     #[account(mut)]
@@ -56,12 +57,79 @@ pub struct Deposit<'info> {
 
 impl<'info> Deposit<'info> {
     pub fn handle_deposit(&mut self, amount: u64, max_token_x: u64, max_token_y: u64) -> Result<()> {
-        // Lock Checks
-
+        // Lock Checks & other checks
+        if self.pool_config.owner.is_none() {
+            return Err(PoolConfigError::PoolNotInitialized.into());
+        }
+        if self.pool_config.is_locked {
+            return Err(PoolConfigError::PoolLocked.into());
+        }
+        if amount == 0 || max_token_x == 0 || max_token_y == 0 {
+            return Err(PoolConfigError::InvalidAmount.into());
+        }
         // Get x and y deposit amounts
+        let mut deposit_x = 0;
+        let mut deposit_y = 0;
 
+        if self.lp_token.supply == 0 && self.token_x_vault.amount == 0 && self.token_y_vault.amount == 0 {
+            // first time deposit
+            deposit_x = max_token_x;
+            deposit_y = max_token_y;
+        } else {
+            let deposit_amount = ConstantProduct::xy_deposit_amounts_from_l(
+                self.token_x_vault.amount,
+                self.token_y_vault.amount,
+                self.lp_token.supply,
+                amount,
+                6
+            ).unwrap();
+            deposit_x = deposit_amount.x;
+            deposit_y = deposit_amount.y;
+        }
+        if deposit_x <= max_token_x && deposit_y <= max_token_y {
+            return Err(AmmDexError::SlippageToleranceExceeded.into());
+        }
         // deposit liquidity
-        msg!("Deposit Instruction done");
+        // Transfer token x from user to vault
+        let cpi_program_token_x = self.token_program.to_account_info();
+        let cpi_accounts_x = Transfer {
+            from: self.user_x_token.to_account_info(),
+            to: self.token_x_vault.to_account_info(),
+            authority: self.user.to_account_info(),
+        };
+        let cpi_context_x = CpiContext::new(cpi_program_token_x, cpi_accounts_x);
+        transfer(cpi_context_x, deposit_x);
+        msg!("Deposited X Amount: {}, Token", deposit_x);
+
+        // Transfer token y from user to vault
+        let cpi_program_token_y = self.token_program.to_account_info();
+        let cpi_accounts_y = Transfer {
+            from: self.user_y_token.to_account_info(),
+            to: self.token_y_vault.to_account_info(),
+            authority: self.user.to_account_info(),
+        };
+        let cpi_context_y = CpiContext::new(cpi_program_token_y, cpi_accounts_y);
+        transfer(cpi_context_y, deposit_y);
+
+        msg!("Deposited Y Amount: {}, Token", deposit_y);
+
+        // Mint LP tokens to user
+        let cpi_program_lp = self.token_program.to_account_info();
+        let cpi_accounts_lp = MintTo {
+            mint: self.lp_token.to_account_info(),
+            to: self.user_lp_token_ac.to_account_info(),
+            authority: self.pool_config.to_account_info(),
+        };
+        let seeds = &[
+            b"pool_config",
+            &self.pool_config.seeds.to_be_bytes()[..],
+            &[self.pool_config.pool_config_bump],
+        ];
+
+        let signer_seeds = &[&seeds[..]];
+        let cpi_context_lp = CpiContext::new_with_signer(cpi_program_lp, cpi_accounts_lp, signer_seeds);
+        mint_to(cpi_context_lp, amount)?;
+        msg!("Minted LP Amount: {}, Token", amount);
         Ok(())
     }
 }
