@@ -27,12 +27,11 @@ pub mod amm {
         ctx.accounts.handle_withdraw(amount, min_token_x, min_token_y)?;
         Ok(())
     }
-
-
-    // pub fn swap(ctx: Context<Swap>) -> Result<()> {
-    //     msg!("Swap Instruction done");
-    //     Ok(())
-    // }
+    
+    pub fn swap(ctx: Context<Swap>) -> Result<()> {
+        msg!("Swap Instruction done");
+        Ok(())
+    }
 
     // pub fn update(ctx: Context<Update>) -> Result<()> {
     //     msg!("Update Instruction done");
