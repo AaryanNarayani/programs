@@ -67,6 +67,7 @@ impl<'info> Init<'info> {
                 lp_token_mint: self.lp_token.key(),
                 token_x_mint: self.token_x_mint.key(),
                 token_y_mint: self.token_y_mint.key(),
+                is_locked: false,
                 owner,
             }
         );
