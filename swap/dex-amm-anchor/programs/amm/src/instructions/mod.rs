@@ -8,4 +8,4 @@ pub use init::*;
 pub use deposit::*;
 pub use withdraw::*;
 pub use swap::*;
-// pub use update::*;
+pub use update::*;

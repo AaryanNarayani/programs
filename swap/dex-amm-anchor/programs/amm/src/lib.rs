@@ -33,9 +33,9 @@ pub mod amm {
         Ok(())
     }
 
-    // pub fn update(ctx: Context<Update>) -> Result<()> {
-    //     msg!("Update Instruction done");
-    //     Ok(())
-    // }
+    pub fn update(ctx: Context<Update>) -> Result<()> {
+        ctx.accounts.handle_update()?;
+        Ok(())
+    }
 }
 
