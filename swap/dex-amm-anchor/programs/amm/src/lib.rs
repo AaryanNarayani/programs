@@ -23,10 +23,10 @@ pub mod amm {
         Ok(())
     }
 
-    // pub fn withdraw(ctx: Context<Withdraw>) -> Result<()> {
-    //     msg!("Withdraw Instruction done");
-    //     Ok(())
-    // }
+    pub fn withdraw(ctx: Context<Withdraw>, amount: u64, min_token_x: u64, min_token_y: u64) -> Result<()> {
+        ctx.accounts.handle_withdraw(amount, min_token_x, min_token_y)?;
+        Ok(())
+    }
 
 
     // pub fn swap(ctx: Context<Swap>) -> Result<()> {

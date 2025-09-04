@@ -6,6 +6,6 @@ pub mod update;
 
 pub use init::*;
 pub use deposit::*;
-// pub use withdraw::*;
+pub use withdraw::*;
 // pub use swap::*;
 // pub use update::*;
