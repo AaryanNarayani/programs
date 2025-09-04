@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
-    token::{Mint, Token, TokenAccount},
+    token::{Mint, Token, TokenAccount,transfer},
 };
 use constant_product_curve::{ConstantProduct, LiquidityPair};
 
@@ -74,8 +74,54 @@ impl<'info> Swap<'info> {
         ).unwrap();
         // Calculate Swap Amounts
         let swap_result = curve.swap(direction, amount, min_swap_amount).unwrap();
-        msg!("Swap Result Deposit: {:?}", swap_result.deposit );
-        msg!("Swap Result Withdrawal: {:?}", swap_result.withdraw);
+        self.deposit_to_vault(
+            if lp_pair_x { &self.user_x_token } else { &self.user_y_token },
+            if lp_pair_x { &self.token_x_vault } else { &self.token_y_vault },
+            swap_result.deposit,
+        )?;
+        self.withdraw_from_vault(
+            if lp_pair_x { &self.token_y_vault } else { &self.token_x_vault },
+            if lp_pair_x { &self.user_y_token } else { &self.user_x_token },
+            swap_result.withdraw,
+        )?;
+        Ok(())
+    }
+    fn deposit_to_vault(
+        &self,
+        from: &Account<'info, TokenAccount>,
+        to: &Account<'info, TokenAccount>,
+        amount: u64,
+    ) -> Result<()> {
+        let cpi_accounts = anchor_spl::token::Transfer {
+            from: from.to_account_info(),
+            to: to.to_account_info(),
+            authority: self.user.to_account_info(),
+        };
+        let cpi_program = self.token_program.to_account_info();
+        let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
+        transfer(cpi_ctx, amount)?;
+        Ok(())
+    }
+    fn withdraw_from_vault(
+        &self,
+        from: &Account<'info, TokenAccount>,
+        to: &Account<'info, TokenAccount>,
+        amount: u64,
+    ) -> Result<()> {
+        let seeds = &[
+            b"pool-config",
+            self.pool_config.owner.as_ref().unwrap().as_ref(),
+            &[self.pool_config.pool_config_bump],
+        ];
+        let signer = &[&seeds[..]];
+        let cpi_accounts = anchor_spl::token::Transfer {
+            from: from.to_account_info(),
+            to: to.to_account_info(),
+            authority: self.pool_config.to_account_info(),
+        };
+        let cpi_program = self.token_program.to_account_info();
+        let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
+        transfer(cpi_ctx, amount)?;
         Ok(())
     }
 }
