@@ -33,8 +33,8 @@ pub mod amm {
         Ok(())
     }
 
-    pub fn update(ctx: Context<Update>) -> Result<()> {
-        ctx.accounts.handle_update()?;
+    pub fn update(ctx: Context<Update>, locked: bool) -> Result<()> {
+        ctx.accounts.handle_update(locked)?;
         Ok(())
     }
 }

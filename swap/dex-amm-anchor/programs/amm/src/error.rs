@@ -18,10 +18,7 @@ pub enum AmmDexError{
     InvalidSwap,
     #[msg("Slippage Tolerance Exceeded")]
     SlippageToleranceExceeded,
-    #[msg("Insufficient Liquidity")]
-    InsufficientLiquidity,
-    #[msg("Insufficient Funds")]
-    InsufficientFunds,
-    #[msg("Fee Exceeds Maximum")]
-    FeeExceedsMaximum,
+    #[msg("Invalid Authority")]
+    InvalidAuthority,
+
 }
