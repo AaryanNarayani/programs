@@ -4,8 +4,8 @@ use anchor_lang::prelude::*;
 #[derive(InitSpace)]
 pub struct PoolConfig {
     pub seeds: u64,
-    pub lp_fee: u64,
-    pub protocol_fee: u64,
+    pub lp_fee: u16,
+    pub protocol_fee: u16,
     pub lp_bump: u8,
     pub pool_config_bump: u8,
     pub lp_token_mint: Pubkey,
