@@ -1,4 +1,5 @@
 #![allow(unexpected_cfgs)]
+#[warn(deprecated)]
 use anchor_lang::prelude::*;
 pub mod instructions;
 declare_id!("85krVjvbktge3QdRPU5dRYSaaSXi2CgB7cqhreoABi36");
@@ -16,11 +17,10 @@ pub mod amm {
         Ok(())
     }
 
-    // pub fn deposit(ctx: Context<Deposit>) -> Result<()> {
-    //     msg!("Deposit Instruction done");
-    //     Ok(())
-    // }
-
+    pub fn deposit(ctx: Context<Deposit>, amount: u64, max_token_x: u64, max_token_y: u64) -> Result<()> {
+        ctx.accounts.handle_deposit(amount, max_token_x, max_token_y)?;
+        Ok(())
+    }
 
     // pub fn withdraw(ctx: Context<Withdraw>) -> Result<()> {
     //     msg!("Withdraw Instruction done");
