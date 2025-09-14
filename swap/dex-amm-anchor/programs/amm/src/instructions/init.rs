@@ -23,7 +23,7 @@ pub struct Init<'info> {
     #[account(
         init,
         payer = owner,
-        space = 8 + std::mem::size_of::<PoolConfig>(),
+        space = 8 + PoolConfig::INIT_SPACE,
         seeds = [b"pool-config", owner.key().as_ref()],
         bump
     )]
