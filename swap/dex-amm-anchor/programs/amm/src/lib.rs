@@ -1,5 +1,5 @@
 #![allow(unexpected_cfgs)]
-#[warn(deprecated)]
+#![allow(deprecated)]
 use anchor_lang::prelude::*;
 pub mod instructions;
 declare_id!("85krVjvbktge3QdRPU5dRYSaaSXi2CgB7cqhreoABi36");
